@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ApiForge.Core.Generation;
 using ApiForge.Core.Project;
 using ApiForge.Generator.Abstractions;
@@ -9,11 +10,13 @@ public sealed class ProjectGenerator : IProjectGenerator
 {
     private readonly TemplateResolver _resolver;
     private readonly GenerationPipeline _pipeline;
+    private readonly IFileSystem _fileSystem;
 
-    public ProjectGenerator(TemplateResolver resolver, GenerationPipeline pipeline)
+    public ProjectGenerator(TemplateResolver resolver, GenerationPipeline pipeline, IFileSystem fileSystem)
     {
         _resolver = resolver;
         _pipeline = pipeline;
+        _fileSystem = fileSystem;
     }
 
     public GenerationResult Generate(ProjectDefinition definition, string outputRootPath)
@@ -31,8 +34,14 @@ public sealed class ProjectGenerator : IProjectGenerator
             };
 
             var files = _pipeline.Run(context);
-
-            return GenerationResult.Ok(outputPath, files);
+            
+            var configFile = ProjectConfigFile.FromDefinition(definition);
+            var configJson = JsonSerializer.Serialize(configFile, new JsonSerializerOptions { WriteIndented = true });
+            var configPath = Path.Combine(outputPath, ".apiforge", "project.json");
+            _fileSystem.WriteAllText(configPath, configJson);
+            var allFiles = files.Append(configPath).ToList();
+            
+            return GenerationResult.Ok(outputPath, allFiles);
         }
         catch (Exception ex)
         {

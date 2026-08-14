@@ -31,7 +31,7 @@ public sealed class ProjectGeneratorTests : IDisposable
         var renderer = new TemplateRenderer();
         var pipeline = new GenerationPipeline(fileSystem, renderer);
         var resolver = new TemplateResolver(_templatesRoot);
-        return new ProjectGenerator(resolver, pipeline);
+        return new ProjectGenerator(resolver, pipeline, fileSystem);
     }
 
     private static ProjectDefinition CreateDefinition() => new() { Name = "OrderService" };
@@ -97,7 +97,7 @@ public sealed class ProjectGeneratorTests : IDisposable
         Assert.True(result.Success, result.ErrorMessage);
 
         var expectedCount = Directory.EnumerateFiles(_templatesRoot, "*", SearchOption.AllDirectories)
-            .Count(f => Path.GetFileName(f) != "template.json");
+            .Count(f => Path.GetFileName(f) != "template.json") + 1; // +1 for .apiforge/project.json
 
         Assert.Equal(expectedCount, result.GeneratedFiles.Count);
     }

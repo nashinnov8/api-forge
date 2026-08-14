@@ -15,7 +15,7 @@ var fileSystem = new FileSystem();
 var renderer = new TemplateRenderer();
 var resolver = new TemplateResolver(templatesRoot);
 var pipeline = new GenerationPipeline(fileSystem, renderer);
-var generator = new ProjectGenerator(resolver, pipeline);
+var generator = new ProjectGenerator(resolver, pipeline, fileSystem);
 
 var rootCommand = new RootCommand("ApiForge — .NET API Starter Kit & Project Generator");
 rootCommand.AddCommand(NewCommand.Create(generator, outputRoot));

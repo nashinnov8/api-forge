@@ -87,7 +87,14 @@ public static class NewCommand
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"✗ dotnet {dotnetArgs} failed");
-            Console.WriteLine(error);
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                Console.WriteLine(output);
+            }
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                Console.WriteLine(error);
+            }
             Console.ResetColor();
         }
     }

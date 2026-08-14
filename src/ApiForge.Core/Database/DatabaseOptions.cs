@@ -1,6 +1,6 @@
-﻿namespace ApiForge.Core.Database;
+namespace ApiForge.Core.Database;
 
 public class DatabaseOptions
 {
-    public DatabaseProvider Provider { get; init; } = DatabaseProvider.None; 
+    public DatabaseProvider Provider { get; init; } = DatabaseProvider.PostgreSQL;
 }
