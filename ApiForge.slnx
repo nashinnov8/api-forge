@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ApiForge.Cli/ApiForge.Cli.csproj" />
+    <Project Path="src/ApiForge.Core/ApiForge.Core.csproj" />
+    <Project Path="src/ApiForge.Generator/ApiForge.Generator.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ApiForge.Cli.Tests/ApiForge.Cli.Tests.csproj" />
+    <Project Path="tests/ApiForge.Core.Tests/ApiForge.Core.Tests.csproj" />
+    <Project Path="tests/ApiForge.Generator.Tests/ApiForge.Generator.Tests.csproj" />
+  </Folder>
+</Solution>
