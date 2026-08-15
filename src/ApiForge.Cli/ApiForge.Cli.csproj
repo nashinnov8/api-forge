@@ -22,7 +22,6 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>apiforge</ToolCommandName>
     <PackageId>ApiForge.Cli</PackageId>
-    <Version>1.0.0</Version>
     <Authors>nashinnov8</Authors>
     <Description>ApiForge - .NET API Starter Kit and Project Generator</Description>
   </PropertyGroup>
