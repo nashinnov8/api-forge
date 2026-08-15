@@ -1,6 +1,6 @@
 # ApiForge
 
-> **Status:** Early stage (V1) — vertical-slice + PostgreSQL scaffolding works end-to-end via the CLI. Interactive wizard, DDD/CQRS toggles, messaging, and config persistence are planned (see [Roadmap](#roadmap)).
+> **Status:** V1 — interactive wizard, 3 architecture templates (vertical-slice, clean-architecture, modular-monolith), DDD/CQRS fragments, auto SDK detection, and NuGet tool distribution all work end-to-end.
 
 ApiForge is an opinionated .NET API starter-kit generator. Instead of a one-size-fits-all boilerplate, you pick only the infrastructure your project actually needs — database, cache, messaging, authentication — and ApiForge scaffolds a production-ready, buildable solution around it.
 
@@ -8,46 +8,63 @@ ApiForge is an opinionated .NET API starter-kit generator. Instead of a one-size
 apiforge new
       │
       ▼
-Interactive Wizard *(planned)*
+Interactive Wizard (Spectre.Console)
       │
       ▼
 Project Definition
       │
       ▼
-Template Resolver
+SDK Detection (auto-detect .NET version)
       │
       ▼
-Template Renderer
+Template Resolver (by architecture style)
+      │
+      ▼
+Fragment Resolver (conditional files)
+      │
+      ▼
+Template Renderer (token replacement)
       │
       ▼
 Generated .NET API
 ```
 
-## Prerequisites
-
-- [.NET SDK 10.0](https://dotnet.microsoft.com/download) (see `global.json` for the exact version)
-
-## Build
+## Install
 
 ```bash
-dotnet build ApiForge.slnx
+dotnet tool install --global ApiForge.Cli
 ```
 
-## Run the CLI
+Requires .NET SDK 8.0 or later on your machine.
+
+## Usage
 
 ```bash
-dotnet run --project src/ApiForge.Cli -- new <ProjectName>
+apiforge new <ProjectName>
+# or just: apiforge new
 ```
 
-The `new` command:
-1. Generates a project into the current directory from the default template.
-2. Creates a solution file (`.slnx`) and adds every generated `.csproj` to it.
-3. Runs `dotnet restore` and `dotnet build` on the generated solution.
+The interactive wizard asks:
+
+- Project name (optional — can pass as argument)
+- Architecture style: `vertical-slice`, `clean-architecture`, `modular-monolith`
+- DDD building blocks (Entity, AggregateRoot, ValueObject, IDomainEvent)
+- CQRS abstractions (ICommand, ICommandHandler)
+- Domain events
+- Database provider: `PostgreSQL` or `None`
+- Test framework: `xUnit`
+- Docker setup
+
+Then it:
+1. Detects the highest installed .NET SDK/runtime on your machine.
+2. Generates the project using the matching `TargetFramework` (net8.0, net9.0, net10.0...).
+3. Creates a solution file and adds every generated `.csproj` to it.
+4. Runs `dotnet restore` and `dotnet build` to verify the output compiles.
 
 ### Example
 
 ```bash
-dotnet run --project src/ApiForge.Cli -- new MyApi
+apiforge new MyApi
 cd MyApi
 dotnet run --project src/MyApi.Api
 ```
@@ -56,11 +73,9 @@ Expected output:
 
 ```
 Generating MyApi...
-✓ Generated 10 files at /path/to/MyApi
+✓ Generated 18 files at /path/to/MyApi
 Running dotnet new sln -n MyApi...
 ✓ dotnet new sln -n MyApi succeeded
-Running dotnet sln add src/MyApi.Api/MyApi.Api.csproj...
-✓ dotnet sln add src/MyApi.Api/MyApi.Api.csproj succeeded
 ...
 Running dotnet restore...
 ✓ dotnet restore succeeded
@@ -79,34 +94,59 @@ curl http://localhost:5000/health
 # {"status":"ok","project":"MyApi"}
 ```
 
-## Tests
+## Development
+
+### Prerequisites
+
+- .NET SDK 8.0 or later (see `global.json` — uses `rollForward: latestMajor`)
+
+### Build
+
+```bash
+dotnet build ApiForge.slnx
+```
+
+### Run from source
+
+```bash
+dotnet run --project src/ApiForge.Cli -- new MyApi
+```
+
+### Tests
 
 ```bash
 dotnet test ApiForge.slnx
 ```
 
 Covers:
-- `ApiForge.Core.Tests` — default values and shape of `ProjectDefinition`.
-- `ApiForge.Generator.Tests` — end-to-end generation pipeline (token replacement in file names/content, template manifest exclusion, generated file count).
+- `ApiForge.Core.Tests` — default values of `ProjectDefinition`, `TargetFramework`, `DotnetVersion`.
+- `ApiForge.Generator.Tests` — template resolution per architecture, fragment activation (DDD, Docker), token replacement, generated file count.
+- `ApiForge.Cli.Tests` — CLI command wiring.
 
 ## Project structure
 
 ```
 src/
-  ApiForge.Cli/        CLI entry point and commands
-  ApiForge.Core/       Domain models and options (framework-agnostic, no dependencies)
-  ApiForge.Generator/  Template resolution, rendering, and generation pipeline
+  ApiForge.Cli/         CLI entry point, wizard, SDK detection
+    Wizard/             Spectre.Console interactive prompts
+    Sdk/                Auto-detects .NET SDK/runtime version
+    Infrastructure/     DotnetCli wrapper for running dotnet commands
+  ApiForge.Core/        Domain models and options (framework-agnostic)
+  ApiForge.Generator/   Template resolution, fragment resolution, rendering
 templates/
-  api/default/         Default API template (Vertical Slice, PostgreSQL, xUnit, Docker)
+  api/
+    vertical-slice/     Vertical Slice architecture template
+    clean-architecture/ Clean Architecture template
+    modular-monolith/   Modular Monolith template (module-based structure)
+  Each template has _fragments/ for conditional files:
+    ddd/                Included when UseDdd = true
+    cqrs/               Included when UseCqrs = true
+    postgres/           Included when Database = PostgreSQL
+    docker/             Included when UseDocker = true
 tests/
   ApiForge.Core.Tests/
   ApiForge.Generator.Tests/
   ApiForge.Cli.Tests/
-samples/                Example generated project(s)
-docs/
-  architecture/         Design decisions and diagrams
-  guides/
-  decisions/
 ```
 
 Dependency direction is enforced one-way:
@@ -115,23 +155,24 @@ Dependency direction is enforced one-way:
 ApiForge.Cli → ApiForge.Generator → ApiForge.Core
 ```
 
-`ApiForge.Core` has no project references. `ApiForge.Generator` never references `ApiForge.Cli`.
-
 ## How generation works
 
-1. `ApiForge.Cli` resolves the template root relative to the CLI's output directory.
-2. `TemplateResolver` selects a template based on the project definition (currently always `api/default`).
-3. `GenerationPipeline` walks every file in the template, replacing `{{ProjectName}}` tokens in both file/folder names and file content.
-4. `ApiForge.Cli` creates a solution file, adds every generated `.csproj` to it, then runs `restore` and `build` to confirm the output actually compiles.
+1. `InteractiveWizard` collects project options (name, architecture, DDD, CQRS, database, Docker).
+2. `SdkDetector` detects the highest installed .NET SDK and sets `TargetFramework` (e.g. `net8.0`) and `DotnetVersion` (e.g. `8.0`).
+3. `TemplateResolver` selects the template directory based on `ArchitectureStyle`.
+4. `GenerationPipeline` copies base template files, replacing `{{ProjectName}}`, `{{TargetFramework}}`, and `{{DotnetVersion}}` tokens.
+5. `FragmentResolver` includes conditional files from `_fragments/` based on the project definition.
+6. `ApiForge.Cli` creates a solution, adds generated projects, then runs `restore` + `build`.
 
 ## Roadmap
 
-- [x] V1 — vertical-slice scaffolding, PostgreSQL, xUnit, automatic solution creation + restore/build
-- [ ] Interactive CLI wizard (Spectre.Console) with dynamic, dependency-aware questions
+- [x] Interactive CLI wizard (Spectre.Console)
+- [x] Multi-template support (vertical-slice, clean-architecture, modular-monolith)
+- [x] Feature fragments (DDD, CQRS, PostgreSQL, Docker)
+- [x] Auto SDK detection (net8.0+)
+- [x] NuGet tool distribution
+- [x] `.apiforge/project.json` — persist configuration into generated project
 - [ ] Non-interactive mode with CLI flags (`--database`, `--auth`, ...) for CI/CD use
-- [ ] `.apiforge/project.json` — persist the chosen configuration into the generated project
-- [ ] DDD building blocks (Entity, AggregateRoot, ValueObject, DomainEvent)
-- [ ] CQRS abstraction (`ICommand`, `ICommandHandler`, `IQuery`)
 - [ ] Redis cache, JWT authentication, ProblemDetails error handling
 - [ ] Messaging (Kafka / RabbitMQ) + Outbox pattern
 - [ ] OpenTelemetry + Serilog observability
