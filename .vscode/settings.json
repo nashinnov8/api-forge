@@ -1,0 +1,9 @@
+{
+  "files.exclude": {
+    "templates/": true
+  },
+  "search.exclude": {
+    "templates/": true
+  },
+  "dotnet.defaultSolution": "ApiForge.slnx"
+}
