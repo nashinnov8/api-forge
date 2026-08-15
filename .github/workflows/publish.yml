@@ -28,7 +28,7 @@ jobs:
         run: dotnet test ApiForge.slnx --no-restore
 
       - name: Pack
-        run: dotnet pack src/ApiForge.Cli/ApiForge.Cli.csproj -c Release -o ./nupkg --no-build
+        run: dotnet pack src/ApiForge.Cli/ApiForge.Cli.csproj -c Release -o ./nupkg
 
       - name: Publish to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
