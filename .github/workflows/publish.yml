@@ -11,6 +11,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -19,7 +20,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "8.0.x"
 
       - name: Restore
         run: dotnet restore ApiForge.slnx
@@ -36,5 +37,10 @@ jobs:
         with:
           user: nashinnov8
 
-      - name: Publish to NuGet
+      - name: Publish to NuGet.org
         run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} --skip-duplicate
+
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget add source --username nashinnov8 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/nashinnov8/index.json"
+          dotnet nuget push ./nupkg/*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
