@@ -48,4 +48,20 @@ public class ProjectDefinitionTests
 
         Assert.Equal("OrderService", definition.Name);
     }
+
+    [Fact]
+    public void Default_TargetFramework_Is_Net80()
+    {
+        var definition = new ProjectDefinition { Name = "OrderService" };
+
+        Assert.Equal("net8.0", definition.TargetFramework);
+    }
+
+    [Fact]
+    public void Default_DotnetVersion_Is_80()
+    {
+        var definition = new ProjectDefinition { Name = "OrderService" };
+
+        Assert.Equal("8.0", definition.DotnetVersion);
+    }
 }

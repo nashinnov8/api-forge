@@ -8,7 +8,7 @@ namespace ApiForge.Core.Project;
 public sealed class ProjectConfigFile
 {
     [JsonPropertyName("projectName")]
-    public required string ProjectName { get; init; }
+    public string ProjectName { get; init; } = string.Empty;
 
     [JsonPropertyName("architecture")]
     public ArchitectureConfig Architecture { get; init; } = new();
@@ -21,6 +21,9 @@ public sealed class ProjectConfigFile
 
     [JsonPropertyName("useDocker")]
     public bool UseDocker { get; init; } = true;
+
+    [JsonPropertyName("targetFramework")]
+    public string TargetFramework { get; init; } = "net8.0";
 
     /// <summary>
     /// Converts JSON Config DTO to domain model (ProjectDefinition).
@@ -45,7 +48,8 @@ public sealed class ProjectConfigFile
             TestFramework = Enum.TryParse<TestFramework>(Testing.Framework, ignoreCase: true, out var testFramework)
                 ? testFramework
                 : TestFramework.XUnit,
-            UseDocker = UseDocker
+            UseDocker = UseDocker,
+            TargetFramework = TargetFramework
         };
     }
 
@@ -60,7 +64,8 @@ public sealed class ProjectConfigFile
             Architecture = new ArchitectureConfig { Style = definition.Architecture.Style.ToString() },
             Database = new DatabaseConfig { Provider = definition.Database.Provider.ToString() },
             Testing = new TestingConfig { Framework = definition.TestFramework.ToString() },
-            UseDocker = definition.UseDocker
+            UseDocker = definition.UseDocker,
+            TargetFramework = definition.TargetFramework
         };
     }
 }

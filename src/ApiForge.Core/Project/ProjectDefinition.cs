@@ -4,9 +4,9 @@ using ApiForge.Core.Testing;
 
 namespace ApiForge.Core.Project;
 
-public class ProjectDefinition
+public record ProjectDefinition
 {
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     public ArchitectureOptions Architecture { get; init; } = new();
 
@@ -15,4 +15,8 @@ public class ProjectDefinition
     public TestFramework TestFramework { get; init; } = TestFramework.XUnit;
 
     public bool UseDocker { get; init; } = true;
+
+    public string TargetFramework { get; init; } = "net8.0";
+
+    public string DotnetVersion { get; init; } = "8.0";
 }

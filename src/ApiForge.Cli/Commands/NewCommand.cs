@@ -1,4 +1,6 @@
 using System.CommandLine;
+using ApiForge.Cli.Infrastructure;
+using ApiForge.Cli.Sdk;
 using ApiForge.Cli.Wizard;
 using ApiForge.Generator.Abstractions;
 
@@ -25,6 +27,15 @@ public static class NewCommand
             {
                 return;
             }
+
+            var targetFramework = SdkDetector.DetectTargetFramework();
+            var dotnetVersion = SdkDetector.DetectDotnetVersion();
+
+            definition = definition with
+            {
+                TargetFramework = targetFramework,
+                DotnetVersion = dotnetVersion
+            };
 
             Console.WriteLine($"Generating {definition.Name}...");
 
@@ -67,27 +78,12 @@ public static class NewCommand
     {
         Console.WriteLine($"Running dotnet {dotnetArgs}...");
 
-        var psi = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = dotnetArgs,
-            WorkingDirectory = workingDirectory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
-        };
+        var (success, output, error) = DotnetCli.Run(dotnetArgs, workingDirectory);
 
-        using var process = System.Diagnostics.Process.Start(psi);
-        process!.WaitForExit();
-
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-
-        if (process.ExitCode == 0)
+        if (success)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"✓ dotnet {dotnetArgs} succeeded");
-            Console.ResetColor();
         }
         else
         {
@@ -101,7 +97,7 @@ public static class NewCommand
             {
                 Console.WriteLine(error);
             }
-            Console.ResetColor();
         }
+        Console.ResetColor();
     }
 }

@@ -4,14 +4,16 @@ namespace ApiForge.Generator.Generation;
 
 public sealed class ProjectContext
 {
-    public required ProjectDefinition Definition { get; init; }
+    public ProjectDefinition Definition { get; init; } = null!;
 
-    public required string TemplatePath { get; init; }
+    public string TemplatePath { get; init; } = string.Empty;
 
-    public required string OutputPath { get; init; }
+    public string OutputPath { get; init; } = string.Empty;
 
     public IReadOnlyDictionary<string, string> Tokens => new Dictionary<string, string>
     {
-        ["ProjectName"] = Definition.Name
+        ["ProjectName"] = Definition.Name,
+        ["TargetFramework"] = Definition.TargetFramework,
+        ["DotnetVersion"] = Definition.DotnetVersion
     };
 }

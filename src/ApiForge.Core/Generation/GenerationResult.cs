@@ -2,9 +2,9 @@ namespace ApiForge.Core.Generation;
 
 public sealed class GenerationResult
 {
-    public required bool Success { get; init; }
+    public bool Success { get; init; }
 
-    public required string OutputPath { get; init; }
+    public string OutputPath { get; init; } = string.Empty;
 
     public IReadOnlyList<string> GeneratedFiles { get; init; } = [];
 

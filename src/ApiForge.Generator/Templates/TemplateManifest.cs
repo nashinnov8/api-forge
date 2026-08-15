@@ -2,11 +2,11 @@ namespace ApiForge.Generator.Templates;
 
 public sealed class TemplateManifest
 {
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
-    public required string Version { get; init; }
+    public string Version { get; init; } = string.Empty;
 
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     public string Architecture { get; init; } = "vertical-slice";
 
