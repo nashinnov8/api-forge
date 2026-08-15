@@ -30,5 +30,11 @@ jobs:
       - name: Pack
         run: dotnet pack src/ApiForge.Cli/ApiForge.Cli.csproj -c Release -o ./nupkg
 
+      - name: NuGet trusted publishing login
+        uses: NuGet/login@v1
+        id: nuget_login
+        with:
+          user: nashinnov8
+
       - name: Publish to NuGet
-        run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget_login.outputs.token }} --skip-duplicate
