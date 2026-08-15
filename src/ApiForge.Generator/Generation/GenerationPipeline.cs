@@ -30,6 +30,19 @@ public sealed class GenerationPipeline
             generatedFiles.Add(destinationPath);
         }
 
+        var fragments = new FragmentResolver(context.TemplatePath, context.Definition);
+        foreach (var fragment in fragments.GetActiveFragments())
+        {
+            var renderedRelativePath = _renderer.RenderPath(fragment.RelativePath, context.Tokens);
+            var destinationPath = Path.Combine(context.OutputPath, renderedRelativePath);
+
+            var rawContent = _fileSystem.ReadAllText(fragment.FilePath);
+            var renderedContent = _renderer.RenderContent(rawContent, context.Tokens);
+
+            _fileSystem.WriteAllText(destinationPath, renderedContent);
+            generatedFiles.Add(destinationPath);
+        }
+
         return generatedFiles;
     }
 }

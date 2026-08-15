@@ -8,7 +8,7 @@ public sealed class TemplateManifest
 
     public required string Type { get; init; }
 
-    public IReadOnlyList<string> Architecture { get; init; } = [];
+    public string Architecture { get; init; } = "vertical-slice";
 
     public IReadOnlyList<string> Features { get; init; } = [];
 }

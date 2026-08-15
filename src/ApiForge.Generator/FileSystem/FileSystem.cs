@@ -6,8 +6,9 @@ public sealed class FileSystem : IFileSystem
 {
     public IEnumerable<string> EnumerateFiles(string rootPath) =>
         Directory.EnumerateFiles(rootPath, "*", SearchOption.AllDirectories)
-            // bỏ qua manifest, nó không phải file của project sinh ra
-            .Where(f => Path.GetFileName(f) != "template.json");
+            // bỏ qua manifest và _fragments/, chúng được xử lý riêng
+            .Where(f => Path.GetFileName(f) != "template.json")
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}_fragments{Path.DirectorySeparatorChar}"));
 
     public string ReadAllText(string filePath) => File.ReadAllText(filePath);
 

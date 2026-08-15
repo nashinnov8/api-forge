@@ -1,7 +1,0 @@
-{
-  "name": "default-api",
-  "version": "1.0.0",
-  "type": "api",
-  "architecture": ["vertical-slice"],
-  "features": ["postgres", "xunit", "docker"]
-}

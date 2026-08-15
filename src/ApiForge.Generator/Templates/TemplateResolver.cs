@@ -1,4 +1,4 @@
-using System.Text.Json;
+using ApiForge.Core.Architecture;
 using ApiForge.Core.Project;
 
 namespace ApiForge.Generator.Templates;
@@ -12,15 +12,20 @@ public sealed class TemplateResolver
         _templatesRoot = templatesRoot;
     }
 
-    // V1: luôn resolve về templates/api/default, chưa cần logic chọn theo Architecture
     public string Resolve(ProjectDefinition definition)
     {
-        var path = Path.Combine(_templatesRoot, "api", "default");
+        var templateDir = definition.Architecture.Style switch
+        {
+            ArchitectureStyle.VerticalSlice => "vertical-slice",
+            ArchitectureStyle.CleanArchitecture => "clean-architecture",
+            ArchitectureStyle.ModularMonolith => "modular-monolith",
+            _ => "vertical-slice"
+        };
+
+        var path = Path.Combine(_templatesRoot, "api", templateDir);
 
         if (!Directory.Exists(path))
         {
-            // Nếu templatesRoot đã trỏ thẳng vào một template (có template.json)
-            // thì dùng trực tiếp thay vì nối thêm api/default.
             if (Directory.Exists(_templatesRoot) &&
                 File.Exists(Path.Combine(_templatesRoot, "template.json")))
             {
@@ -40,8 +45,8 @@ public sealed class TemplateResolver
         var manifestPath = Path.Combine(templatePath, "template.json");
         var json = File.ReadAllText(manifestPath);
 
-        return JsonSerializer.Deserialize<TemplateManifest>(json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        return System.Text.Json.JsonSerializer.Deserialize<TemplateManifest>(json,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? throw new InvalidOperationException("Invalid template manifest.");
     }
 }

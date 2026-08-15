@@ -1,0 +1,7 @@
+{
+  "name": "clean-architecture",
+  "version": "1.0.0",
+  "type": "api",
+  "architecture": "clean-architecture",
+  "features": ["postgres", "xunit", "docker", "ddd", "cqrs"]
+}

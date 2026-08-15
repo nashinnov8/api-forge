@@ -1,0 +1,7 @@
+{
+  "name": "modular-monolith",
+  "version": "1.0.0",
+  "type": "api",
+  "architecture": "modular-monolith",
+  "features": ["postgres", "xunit", "docker", "ddd", "cqrs"]
+}

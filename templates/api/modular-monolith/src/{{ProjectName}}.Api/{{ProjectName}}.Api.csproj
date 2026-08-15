@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../{{ProjectName}}.SharedKernel/{{ProjectName}}.SharedKernel.csproj" />
+    <ProjectReference Include="../Modules/Orders/{{ProjectName}}.Modules.Orders.Api/{{ProjectName}}.Modules.Orders.Api.csproj" />
+    <ProjectReference Include="../Modules/Customers/{{ProjectName}}.Modules.Customers.Api/{{ProjectName}}.Modules.Customers.Api.csproj" />
+  </ItemGroup>
+</Project>

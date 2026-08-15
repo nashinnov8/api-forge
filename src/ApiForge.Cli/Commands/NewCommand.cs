@@ -1,5 +1,5 @@
 using System.CommandLine;
-using ApiForge.Core.Project;
+using ApiForge.Cli.Wizard;
 using ApiForge.Generator.Abstractions;
 
 namespace ApiForge.Cli.Commands;
@@ -8,19 +8,25 @@ public static class NewCommand
 {
     public static Command Create(IProjectGenerator generator, string outputRootPath)
     {
-        var nameArgument = new Argument<string>("name", "Tên project cần generate");
+        var nameArgument = new Argument<string?>("name", "Tên project cần generate")
+        {
+            Arity = ArgumentArity.ZeroOrOne
+        };
 
         var command = new Command("new", "Generate một .NET API project mới")
         {
             nameArgument
         };
 
-        command.SetHandler((string name) =>
+        command.SetHandler((string? name) =>
         {
-            // V1: hardcode ProjectDefinition — chưa có wizard, chỉ để xác nhận pipeline chạy đúng
-            var definition = new ProjectDefinition { Name = name };
+            var definition = InteractiveWizard.Run(name);
+            if (definition is null)
+            {
+                return;
+            }
 
-            Console.WriteLine($"Generating {name}...");
+            Console.WriteLine($"Generating {definition.Name}...");
 
             var result = generator.Generate(definition, outputRootPath);
 
@@ -36,7 +42,7 @@ public static class NewCommand
             Console.WriteLine($"✓ Generated {result.GeneratedFiles.Count} files at {result.OutputPath}");
             Console.ResetColor();
 
-            RunDotnetCommand($"new sln -n {name}", result.OutputPath);
+            RunDotnetCommand($"new sln -n {definition.Name}", result.OutputPath);
             var csprojFiles = Directory.EnumerateFiles(result.OutputPath, "*.csproj", SearchOption.AllDirectories);
 
             foreach (var csprojPath in csprojFiles)
@@ -50,7 +56,7 @@ public static class NewCommand
             Console.WriteLine();
             Console.WriteLine("Next steps:");
             Console.WriteLine($"  cd {result.OutputPath}");
-            Console.WriteLine($"  dotnet run --project src/{name}.Api");
+            Console.WriteLine($"  dotnet run --project src/{definition.Name}.Api");
 
         }, nameArgument);
 
